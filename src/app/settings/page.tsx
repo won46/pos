@@ -244,7 +244,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-3">
                   <Bell size={18} className="text-[var(--foreground-muted)]" />
                   <div>
-                    <p className="font-medium">Notifikasi</p>
+                    <p className="text-sm font-medium">POS v1.0.0</p>
                     <p className="text-sm text-[var(--foreground-muted)]">Terima pemberitahuan stok rendah</p>
                   </div>
                 </div>

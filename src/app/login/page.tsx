@@ -129,27 +129,27 @@ export default function LoginPage() {
           </p>
           <div className="space-y-2">
             <button
-              onClick={() => handleDemoLogin('admin@swiftpos.com', 'admin123')}
+              onClick={() => handleDemoLogin('admin@pos.com', 'admin123')}
               className="w-full p-3 rounded-lg bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-colors text-left border border-[var(--border)]"
               type="button"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">Admin</p>
-                  <p className="text-xs text-[var(--foreground-muted)]">admin@swiftpos.com</p>
+                  <p className="text-xs text-[var(--foreground-muted)]">admin@pos.com</p>
                 </div>
                 <span className="badge badge-error text-xs">ADMIN</span>
               </div>
             </button>
             <button
-              onClick={() => handleDemoLogin('kasir@swiftpos.com', 'cashier123')}
+              onClick={() => handleDemoLogin('kasir@pos.com', 'cashier123')}
               className="w-full p-3 rounded-lg bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-colors text-left border border-[var(--border)]"
               type="button"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">Kasir</p>
-                  <p className="text-xs text-[var(--foreground-muted)]">kasir@swiftpos.com</p>
+                  <p className="text-xs text-[var(--foreground-muted)]">kasir@pos.com</p>
                 </div>
                 <span className="badge badge-info text-xs">KASIR</span>
               </div>
@@ -160,7 +160,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-[var(--foreground-muted)]">
-            © 2025 SwiftPOS. Modern Point of Sales System
+            © 2025 POS. Modern Point of Sales System
           </p>
         </div>
       </motion.div>

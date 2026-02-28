@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![SwiftPOS](https://img.shields.io/badge/SwiftPOS-v1.0.0-blue)
+![POS](https://img.shields.io/badge/POS-v1.0.0-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
@@ -35,7 +35,7 @@
 
 ## 🌟 Overview
 
-SwiftPOS is a complete, production-ready Point of Sales system designed for modern retail businesses. Built with enterprise-grade technologies, it offers a beautiful dark-themed UI, real-time analytics, comprehensive inventory management, and robust authentication.
+POS is a complete, production-ready Point of Sales system designed for modern retail businesses. Built with enterprise-grade technologies, it offers a beautiful dark-themed UI, real-time analytics, comprehensive inventory management, and robust authentication.
 
 ### Key Highlights
 
