@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "POS",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.pos.app",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -27,7 +27,7 @@
     "active": true,
     "targets": "all",
     "externalBin": [
-      "sidecars/pos-server"
+      "pos-server"
     ],
     "icon": [
       "icons/32x32.png",
