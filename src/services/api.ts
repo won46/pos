@@ -3,13 +3,19 @@ import axios from 'axios';
 
 // Determine API URL (Client-side vs Server-side)
 const getBaseUrl = () => {
-  // If running in browser/Tauri, construct URL from current hostname
+  // If explicitly defined via env var (e.g., in Vercel), use it first
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // If running in browser/Tauri without env var, fallback to current hostname
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname || 'localhost';
     const port = '5001'; 
     return `http://${hostname}:${port}/api`;
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+  
+  return 'http://localhost:5001/api';
 };
 
 const API_URL = getBaseUrl();
@@ -585,10 +591,17 @@ export const printerAPI = {
 export const getImageUrl = (imageUrl?: string | null) => {
   if (!imageUrl) return null;
   if (imageUrl.startsWith('http')) return imageUrl;
-  // Use dynamic base URL
+  
+  // Use explicitly defined base URL first
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL.replace('/api', '');
+    return `${baseUrl}${imageUrl}`;
+  }
+
+  // Fallback for local development
   const baseUrl = (typeof window !== 'undefined')
     ? `http://${window.location.hostname}:5001`
-    : (process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5001');
+    : 'http://localhost:5001';
 
   return `${baseUrl}${imageUrl}`;
 };

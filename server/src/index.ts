@@ -33,14 +33,20 @@ import printerRoutes from './routes/printer.routes';
 
 const app: Application = express();
 const httpServer = createServer(app);
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000'];
+const getAllowedOrigins = () => {
+  if (process.env.ALLOWED_ORIGINS) {
+    return process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
+  }
+  return ['http://localhost:3000', 'http://localhost:1420', 'tauri://localhost'];
+};
+
+const allowedOrigins = getAllowedOrigins();
 
 const io = new Server(httpServer, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
   },
 });
 
