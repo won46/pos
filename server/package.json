@@ -1,0 +1,57 @@
+{
+  "name": "pos-server",
+  "version": "1.0.0",
+  "description": "POS Application Backend API",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "build:bundle": "ncc build src/index.ts -o dist-bundle -m",
+    "build:binary:macos": "pkg dist-bundle/index.js --targets node18-macos-arm64 --output dist-bin/pos-server-macos",
+    "build:binary:win": "pkg dist-bundle/index.js --targets node18-win-x64 --output dist-bin/pos-server-win.exe"
+  },
+  "keywords": [
+    "pos",
+    "api",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.8.0",
+    "@types/escpos": "^2.5.5",
+    "@types/multer": "^2.0.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "escpos": "^3.0.0-alpha.6",
+    "escpos-usb": "^3.0.0-alpha.4",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "jsonwebtoken": "^9.0.2",
+    "midtrans-client": "^1.4.3",
+    "multer": "^2.0.2",
+    "socket.io": "^4.6.1",
+    "xlsx": "^0.18.5",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.19",
+    "@vercel/ncc": "^0.38.4",
+    "pkg": "^5.8.1",
+    "prisma": "^5.8.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}

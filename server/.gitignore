@@ -1,0 +1,10 @@
+# dependencies
+node_modules/
+
+# local database
+prisma/dev.db
+
+# build artifacts
+dist/
+dist-bundle/
+dist-bin/
