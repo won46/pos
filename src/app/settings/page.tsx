@@ -30,7 +30,7 @@ interface Settings {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>({
-    storeName: 'SwiftPOS Store',
+    storeName: 'POS Store',
     storeAddress: 'Jl. Contoh No. 123, Jakarta',
     storePhone: '021-12345678',
     taxRate: 11,
@@ -241,10 +241,8 @@ export default function SettingsPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-                <div className="flex items-center gap-3">
-                  <Bell size={18} className="text-[var(--foreground-muted)]" />
                   <div>
-                    <p className="text-sm font-medium">POS v1.0.0</p>
+                    <p className="font-medium">Notifikasi</p>
                     <p className="text-sm text-[var(--foreground-muted)]">Terima pemberitahuan stok rendah</p>
                   </div>
                 </div>
@@ -252,6 +250,16 @@ export default function SettingsPage() {
                   checked={settings.enableNotifications}
                   onChange={(val) => setSettings({ ...settings, enableNotifications: val })}
                 />
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+                <div className="flex items-center gap-3">
+                  <Shield size={18} className="text-[var(--foreground-muted)]" />
+                  <div>
+                    <p className="text-sm font-medium">Informasi Sistem</p>
+                    <p className="text-xs text-[var(--foreground-muted)]">POS v1.0.0</p>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">

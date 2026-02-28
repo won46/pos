@@ -166,8 +166,8 @@ Before installation, ensure you have:
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/swiftpos.git
-cd swiftpos
+git clone https://github.com/yourusername/pos.git
+cd pos
 ```
 
 ### 2. Install Frontend Dependencies
@@ -317,12 +317,12 @@ See `server/env.example` for complete configuration options.
 ## 🔑 Demo Accounts
 
 ### Admin Account
-- **Email**: admin@swiftpos.com
+- **Email**: admin@pos.com
 - **Password**: admin123
 - **Access**: Full system access
 
 ### Cashier Account
-- **Email**: kasir@swiftpos.com
+- **Email**: kasir@pos.com
 - **Password**: cashier123
 - **Access**: POS only
 
@@ -481,7 +481,7 @@ FRONTEND_URL=https://your-domain.com
 ## 📁 Project Structure
 
 ```
-swiftpos/
+pos/
 ├── src/                          # Frontend source
 │   ├── app/                      # Next.js pages
 │   │   ├── dashboard/            # Dashboard page
