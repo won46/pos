@@ -241,6 +241,8 @@ export default function SettingsPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+                <div className="flex items-center gap-3">
+                  <Bell size={18} className="text-[var(--foreground-muted)]" />
                   <div>
                     <p className="font-medium">Notifikasi</p>
                     <p className="text-sm text-[var(--foreground-muted)]">Terima pemberitahuan stok rendah</p>
