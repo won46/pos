@@ -6,7 +6,7 @@ import { SearchInput } from '@/components/ui';
 import { transactionsAPI } from '@/services/api';
 import { exportTransactionsToExcel, exportReceiptToPDF } from '@/lib/exportUtils';
 import { Transaction } from '@/types';
-import { Calendar, Filter, Eye, Download, Printer } from 'lucide-react';
+import { Calendar, Filter, Eye, Download, Printer, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { usePrint } from '@/hooks/usePrint';
 import { ReceiptModal } from '@/components/pos/ReceiptModal';
@@ -27,6 +27,14 @@ export default function TransactionsPage() {
   // State for Receipt Modal
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [selectedTransactionForReceipt, setSelectedTransactionForReceipt] = useState<Transaction | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    }
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
@@ -64,6 +72,24 @@ export default function TransactionsPage() {
   const handlePrintReceipt = async (transaction: Transaction) => {
     setSelectedTransactionForReceipt(transaction);
     await printReceipt(transaction);
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus (Void) transaksi ini? Stok akan dikembalikan dan debt akan dibatalkan.')) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await transactionsAPI.delete(id);
+      alert('Transaksi berhasil dihapus');
+      fetchTransactions();
+    } catch (error: any) {
+      console.error('Failed to delete transaction:', error);
+      alert(error.response?.data?.message || 'Gagal menghapus transaksi');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatPrice = (price: number | string) => {
@@ -317,6 +343,15 @@ export default function TransactionsPage() {
                           >
                             <Printer size={16} />
                           </button>
+                          {(currentUser?.role === 'ADMIN' || currentUser?.role === 'OWNER') && (
+                            <button
+                              className="p-2 rounded-lg hover:bg-[var(--error-bg)] transition-colors text-[var(--error)]"
+                              onClick={() => handleDeleteTransaction(transaction.id)}
+                              title="Hapus Transaksi"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </motion.tr>

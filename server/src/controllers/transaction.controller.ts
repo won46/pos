@@ -462,3 +462,97 @@ export const getTodayStats = async (req: Request, res: Response) => {
     });
   }
 };
+// Delete transaction
+export const deleteTransaction = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Check transaction existence
+    const transaction = await prisma.transaction.findUnique({
+      where: { id },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found',
+      });
+    }
+
+    // Role check - only admin can delete (assume roleId mapping or use req.user.role)
+    // For now, let's just let it pass or check if req.user is admin
+    const userRole = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      include: { role: true }
+    });
+
+    if (userRole?.role.name !== 'ADMIN' && userRole?.role.name !== 'OWNER') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized: Only admins can delete transactions',
+      });
+    }
+
+    // Start DB Transaction to rollback stock and delete
+    await prisma.$transaction(async (tx) => {
+      // 1. Revert product stock
+      for (const item of transaction.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stockQuantity: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+
+      // 2. Rollback customer debt if transaction was on DEBT
+      if (transaction.customerId && transaction.remainingAmount > 0) {
+        await tx.customer.update({
+          where: { id: transaction.customerId },
+          data: {
+            currentDebt: {
+              decrement: transaction.remainingAmount,
+            },
+          },
+        });
+      }
+
+      // 3. Delete related records
+      // TransactionPayment (debtPayments relation)
+      await tx.transactionPayment.deleteMany({
+        where: { transactionId: id }
+      });
+
+      // TransactionItem (cascaded in schema? let's be safe)
+      await tx.transactionItem.deleteMany({
+        where: { transactionId: id }
+      });
+
+      // Payment (relation Payment has onDelete: Cascade in schema)
+      await tx.payment.deleteMany({
+        where: { transactionId: id }
+      });
+
+      // 4. Delete the transaction itself
+      await tx.transaction.delete({
+        where: { id },
+      });
+    });
+
+    res.json({
+      success: true,
+      message: 'Transaction deleted and stock reverted successfully',
+    });
+  } catch (error: any) {
+    console.error('Delete transaction error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete transaction',
+    });
+  }
+};

@@ -52,7 +52,7 @@ export function usePrint() {
           const price = item.unitPrice.toLocaleString();
           const total = item.totalPrice.toLocaleString();
           receipt += `${qty} x ${price}`.padEnd(20) + total.padStart(12) + '\n';
-          
+
           if (item.discount && item.discount > 0) {
             receipt += `  (Potongan: -${item.discount.toLocaleString()})\n`;
           }
@@ -137,7 +137,17 @@ export function usePrint() {
           storeAddress: settings?.storeAddress,
           storePhone: settings?.storePhone,
           amountPaid: transaction.paidAmount,
-          change: transaction.changeAmount
+          change: transaction.changeAmount,
+          invoiceNumber: transaction.invoiceNumber,
+          transactionDate: new Date(transaction.transactionDate).toLocaleString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          cashierName: transaction.user?.fullName || 'N/A',
+          customerName: transaction.customerName || null
         };
         await printerAPI.printReceipt(printData);
         alert("Mencetak ke printer default sistem...");

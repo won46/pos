@@ -186,6 +186,9 @@ export const transactionsAPI = {
     notes?: string;
   }) =>
     api.post(`/transactions/${id}/repay`, data),
+
+  delete: (id: string) =>
+    api.delete(`/transactions/${id}`),
 };
 
 // Categories API

@@ -5,6 +5,7 @@ import {
   getTransaction,
   getTodayStats,
   repayDebt,
+  deleteTransaction,
 } from '../controllers/transaction.controller';
 import { protect } from '../middleware/auth.middleware';
 
@@ -27,5 +28,8 @@ router.post('/:id/repay', repayDebt);
 
 // Get single transaction
 router.get('/:id', getTransaction);
+
+// Delete transaction
+router.delete('/:id', deleteTransaction);
 
 export default router;
