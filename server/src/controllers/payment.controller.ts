@@ -68,8 +68,8 @@ export const createQrisPayment = async (req: Request, res: Response) => {
         paymentType: 'qris',
         status: 'pending',
         qrCode: qrCodeUrl || chargeResponse.qr_string,
-        expiryTime: chargeResponse.expiry_time 
-          ? new Date(chargeResponse.expiry_time) 
+        expiryTime: chargeResponse.expiry_time
+          ? new Date(chargeResponse.expiry_time)
           : new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiry
         gatewayResponse: JSON.stringify(chargeResponse),
       },
@@ -207,8 +207,8 @@ export const checkPaymentStatus = async (req: Request, res: Response) => {
         where: { orderId },
         data: {
           status: statusResponse.transaction_status,
-          paidAt: statusResponse.transaction_status === 'settlement' 
-            ? new Date() 
+          paidAt: statusResponse.transaction_status === 'settlement'
+            ? new Date()
             : null,
           gatewayResponse: JSON.stringify(statusResponse),
         },
@@ -252,11 +252,11 @@ export const handleWebhook = async (req: Request, res: Response) => {
     // Verify notification signature
     const serverKey = process.env.MIDTRANS_SERVER_KEY || '';
     const signatureKey = notification.signature_key;
-    
+
     const orderId = notification.order_id;
     const statusCode = notification.status_code;
     const grossAmount = notification.gross_amount;
-    
+
     const expectedSignature = crypto
       .createHash('sha512')
       .update(`${orderId}${statusCode}${grossAmount}${serverKey}`)
@@ -286,7 +286,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
         newStatus = fraudStatus === 'accept' ? 'settlement' : 'pending';
       } else if (transactionStatus === 'settlement') {
         newStatus = 'settlement';
-        paidAt = new Date();
+        paidAt = new Date() as any;
       } else if (['cancel', 'deny', 'expire'].includes(transactionStatus)) {
         newStatus = transactionStatus;
       } else if (transactionStatus === 'pending') {

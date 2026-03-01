@@ -16,14 +16,20 @@ export default function POSPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Barcode scanner state
   const [scanStatus, setScanStatus] = useState<'ready' | 'success' | 'error'>('ready');
   const [lastScannedProduct, setLastScannedProduct] = useState<string>('');
   const [notFoundBarcode, setNotFoundBarcode] = useState<string | null>(null);
-  
+  const [outOfStockProduct, setOutOfStockProduct] = useState<Product | null>(null);
+
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { addItem } = useCartStore();
+  const { addItem, items } = useCartStore();
+
+  // Auto-focus on search box on mount
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
 
   // Fetch products & categories
   useEffect(() => {
@@ -46,7 +52,7 @@ export default function POSPage() {
       const params: any = {};
       if (searchQuery) params.search = searchQuery;
       if (selectedCategory) params.category = selectedCategory;
-      
+
       const response = await productsAPI.getAll(params);
       setProducts(response.data.data);
     } catch (error) {
@@ -81,6 +87,8 @@ export default function POSPage() {
           quantity: item.quantity,
           unitPrice: Number(item.unitPrice),
           totalPrice: Number(item.totalPrice),
+          discountAmount: Number(item.discount || 0),
+          discountPercent: Number(item.discountPercent || 0),
         })),
         subtotal: getSubtotal(),
         taxAmount: getTaxAmount(),
@@ -93,12 +101,12 @@ export default function POSPage() {
 
       // Save to database
       const response = await transactionsAPI.create(transactionData);
-      
+
       console.log('Transaction saved successfully:', response.data);
-      
+
       // TODO: Print receipt
       // TODO: Open cash drawer if CASH
-      
+
     } catch (error) {
       console.error('Failed to save transaction:', error);
       alert('Gagal menyimpan transaksi. Silakan coba lagi.');
@@ -115,15 +123,23 @@ export default function POSPage() {
       const product = response.data.data;
 
       if (product) {
+        // Stock Check
+        if (product.stock <= 0) {
+          setOutOfStockProduct(product);
+          return;
+        }
+
         addItem(product);
         setScanStatus('success');
         setLastScannedProduct(product.name);
-        
+
         // Reset status after 2 seconds
         setTimeout(() => {
           setScanStatus('ready');
           setLastScannedProduct('');
         }, 2000);
+      } else {
+        setNotFoundBarcode(barcode);
       }
     } catch (error) {
       console.error('Product not found:', error);
@@ -144,9 +160,22 @@ export default function POSPage() {
 
   const handleCloseModal = () => {
     setNotFoundBarcode(null);
-    // Return focus to body so scanner can work again
-    document.body.focus();
+    setOutOfStockProduct(null);
+    // Return focus to search after closing modal
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 100);
   };
+
+  // Listen for Enter from CartPanel to return focus
+  useEffect(() => {
+    const handleReturnFocus = () => {
+      searchInputRef.current?.focus();
+      setSearchQuery('');
+    };
+    window.addEventListener('pos-return-focus', handleReturnFocus);
+    return () => window.removeEventListener('pos-return-focus', handleReturnFocus);
+  }, []);
 
   // Global Barcode Listener
   useEffect(() => {
@@ -157,22 +186,22 @@ export default function POSPage() {
       // Ignore if user is typing in an input field (search, quantity, or modal inputs)
       const target = e.target as HTMLElement;
       if (
-        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && 
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') &&
         !notFoundBarcode // Allow scanning even if modal is open? No, probably confusing.
       ) {
         return;
       }
-      
+
       // If modal is open, ignore scanner input to prevent infinite loops or confusion
       if (notFoundBarcode) return;
 
       const currentTime = Date.now();
-      
+
       // If time between keys is too long, reset buffer (it's manual typing, not scanner)
       if (currentTime - lastKeyTime > 100) {
         buffer = '';
       }
-      
+
       lastKeyTime = currentTime;
 
       if (e.key === 'Enter') {
@@ -211,17 +240,21 @@ export default function POSPage() {
               ref={searchInputRef}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  handleBarcodeSubmit(searchQuery.trim());
+                }
+              }}
               placeholder="Cari produk berdasarkan nama atau SKU..."
             />
-            
+
             {/* Barcode Scanner Indicator */}
             <div className="flex items-center justify-between px-4 py-3 bg-[var(--surface)] rounded-lg border border-[var(--border)]">
               <div className="flex items-center gap-3">
-                <Scan className={`${
-                  scanStatus === 'success' ? 'text-green-500' :
+                <Scan className={`${scanStatus === 'success' ? 'text-green-500' :
                   scanStatus === 'error' ? 'text-red-500' :
-                  'text-[var(--primary)]'
-                }`} size={20} />
+                    'text-[var(--primary)]'
+                  }`} size={20} />
                 <div>
                   <div className="text-sm font-medium">
                     {scanStatus === 'success' && 'Produk Ditambahkan!'}
@@ -235,11 +268,11 @@ export default function POSPage() {
                   )}
                 </div>
               </div>
-              
+
               {scanStatus === 'success' && <CheckCircle className="text-green-500" size={20} />}
               {scanStatus === 'error' && <XCircle className="text-red-500" size={20} />}
             </div>
-            
+
 
           </div>
 
@@ -285,6 +318,30 @@ export default function POSPage() {
             </Button>
             <Button onClick={handleManualSearch}>
               Cari Manual
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Out of Stock Modal */}
+      <Modal
+        isOpen={!!outOfStockProduct}
+        onClose={handleCloseModal}
+        title="Stok Habis"
+        size="sm"
+      >
+        <div className="space-y-6 text-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mb-4">
+            <XCircle size={24} />
+          </div>
+          <p className="font-medium text-lg text-gray-900">{outOfStockProduct?.name}</p>
+          <p className="text-sm text-gray-500">
+            Maaf, stok barang ini sudah habis (0).
+            Silakan lakukan stok opname atau pembelian barang terlebih dahulu.
+          </p>
+          <div className="flex justify-center mt-6">
+            <Button variant="primary" onClick={handleCloseModal} className="w-full">
+              Tutup
             </Button>
           </div>
         </div>

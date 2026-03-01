@@ -3,19 +3,12 @@ import axios from 'axios';
 
 // Determine API URL (Client-side vs Server-side)
 const getBaseUrl = () => {
-  // If explicitly defined via env var (e.g., in Vercel), use it first
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  
-  // If running in browser/Tauri without env var, fallback to current hostname
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname || 'localhost';
-    const port = '5001'; 
-    return `http://${hostname}:${port}/api`;
-  }
-  
-  return 'http://localhost:5001/api';
+
+  // Always use 127.0.0.1 for local backend to avoid hostname resolution issues in Tauri
+  return 'http://127.0.0.1:5001/api';
 };
 
 const API_URL = getBaseUrl();
@@ -591,7 +584,7 @@ export const printerAPI = {
 export const getImageUrl = (imageUrl?: string | null) => {
   if (!imageUrl) return null;
   if (imageUrl.startsWith('http')) return imageUrl;
-  
+
   // Use explicitly defined base URL first
   if (process.env.NEXT_PUBLIC_API_URL) {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL.replace('/api', '');

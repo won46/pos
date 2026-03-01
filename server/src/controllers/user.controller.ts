@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // Get all users
 export const getUsers = async (req: Request, res: Response) => {

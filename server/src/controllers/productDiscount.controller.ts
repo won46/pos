@@ -73,31 +73,31 @@ export const getApplicableDiscounts = async (req: Request, res: Response) => {
       // Product-specific first (highest priority)
       const aIsProductSpecific = a.applicableProducts.includes(productId);
       const bIsProductSpecific = b.applicableProducts.includes(productId);
-      
+
       if (aIsProductSpecific && !bIsProductSpecific) return -1;
       if (!aIsProductSpecific && bIsProductSpecific) return 1;
-      
+
       // Then category-specific
       const aIsCategorySpecific = a.categoryId !== null;
       const bIsCategorySpecific = b.categoryId !== null;
-      
+
       if (aIsCategorySpecific && !bIsCategorySpecific) return -1;
       if (!aIsCategorySpecific && bIsCategorySpecific) return 1;
-      
+
       // Then by value (higher discount first)
       const aValue = parseFloat(a.value.toString());
       const bValue = parseFloat(b.value.toString());
-      
+
       // For percentage, compare directly
       if (a.type === 'PERCENTAGE' && b.type === 'PERCENTAGE') {
         return bValue - aValue;
       }
-      
+
       // For fixed amount, compare directly
       if (a.type === 'FIXED_AMOUNT' && b.type === 'FIXED_AMOUNT') {
         return bValue - aValue;
       }
-      
+
       // Mixed types, percentage usually better for high-value items
       // This is simplified, in reality you'd calculate based on product price
       return 0;
@@ -179,12 +179,12 @@ export const getBestDiscount = async (req: Request, res: Response) => {
     });
 
     // Calculate discount amounts and find best
-    let bestDiscount = null;
+    let bestDiscount: any = null;
     let bestDiscountAmount = 0;
 
     for (const discount of discounts) {
       let discountAmount = 0;
-      
+
       if (discount.type === 'PERCENTAGE') {
         discountAmount = (productPrice * parseFloat(discount.value.toString())) / 100;
       } else {

@@ -80,26 +80,28 @@ export function Receipt({ transaction }: ReceiptProps) {
             <th>Item</th>
             <th>Qty</th>
             <th>Harga</th>
+            <th>Disc</th>
             <th>Total</th>
           </tr>
         </thead>
-        <tbody>
-          {transaction.items?.map((item, idx) => (
-            <tr key={idx}>
-              <td>
-                <div>{item.product?.name || 'Product'}</div>
-                {item.discount && item.discount > 0 && (
-                  <div style={{ fontSize: '0.7rem', color: '#10B981', marginLeft: '0.5rem' }}>
-                    (Potongan: -{formatCurrency(item.discount)})
-                  </div>
-                )}
+        {transaction.items?.map((item, idx) => (
+          <tbody key={idx} style={{ borderBottom: '1px solid #f3f4f6' }}>
+            <tr>
+              <td colSpan={5} style={{ paddingTop: '10px', fontWeight: '500', color: '#374151' }}>
+                {item.product?.name || 'Product'}
               </td>
-              <td>{item.quantity}</td>
-              <td>{formatCurrency(item.unitPrice)}</td>
-              <td>{formatCurrency(item.totalPrice)}</td>
             </tr>
-          ))}
-        </tbody>
+            <tr>
+              <td></td>
+              <td style={{ textAlign: 'center', paddingBottom: '10px' }}>{item.quantity}</td>
+              <td style={{ textAlign: 'right', paddingBottom: '10px' }}>{formatCurrency(item.unitPrice)}</td>
+              <td style={{ textAlign: 'center', paddingBottom: '10px', color: '#10B981', fontWeight: 'bold' }}>
+                {item.discountPercent && item.discountPercent > 0 ? `${item.discountPercent}%` : '-'}
+              </td>
+              <td style={{ textAlign: 'right', paddingBottom: '10px' }}>{formatCurrency(item.totalPrice)}</td>
+            </tr>
+          </tbody>
+        ))}
       </table>
 
       <div className="receipt-divider">================================</div>

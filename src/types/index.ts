@@ -101,6 +101,7 @@ export interface TransactionItem {
   unitPrice: number;
   totalPrice: number;
   discount?: number;
+  discountAmount?: number;
   discountPercent?: number;
 }
 

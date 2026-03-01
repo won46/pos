@@ -30,6 +30,7 @@ import rolePermissionRoutes from './routes/rolePermission.routes';
 import customerRoutes from './routes/customer.routes';
 import dataManagementRoutes from './routes/dataManagement.routes';
 import printerRoutes from './routes/printer.routes';
+import { checkAndMigrateDatabase } from './utils/migration';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -59,6 +60,12 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Request logging
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  next();
+});
 
 // Socket.IO connection
 io.on('connection', (socket) => {
@@ -113,9 +120,13 @@ app.use((err: any, req: any, res: any, next: any) => {
 });
 
 // Start server
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Socket.IO ready for real-time updates`);
-});
+(async () => {
+  await checkAndMigrateDatabase();
+
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 Socket.IO ready for real-time updates`);
+  });
+})();
 
 export { io };

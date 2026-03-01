@@ -4,9 +4,9 @@
 import { useState } from 'react';
 // import { Card } from '@/components/ui/card'; // Does not exist
 import { Button } from '@/components/ui'; // Exists
-import { AlertCircle, FileSpreadsheet, Trash2, CheckCircle, Database, Search } from 'lucide-react';
+import { AlertCircle, FileSpreadsheet, Trash2, CheckCircle, Database, Search, ArrowLeft } from 'lucide-react';
 import { dataManagementAPI } from '@/services/api';
-// import { toast } from 'react-hot-toast'; // Not installed
+import Link from 'next/link';
 
 export default function DataSettingsPage() {
   const [isResetting, setIsResetting] = useState(false);
@@ -69,6 +69,14 @@ export default function DataSettingsPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <div className="mb-6">
+        <Link href="/dashboard">
+          <Button variant="secondary" icon={ArrowLeft} className="flex items-center gap-2">
+            Kembali ke Dashboard
+          </Button>
+        </Link>
+      </div>
+
       <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <Database className="w-6 h-6" />
         Manajemen Data

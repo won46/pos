@@ -9,6 +9,7 @@ import { Transaction } from '@/types';
 import { Calendar, Filter, Eye, Download, Printer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { usePrint } from '@/hooks/usePrint';
+import { ReceiptModal } from '@/components/pos/ReceiptModal';
 
 type TransactionStatus = 'COMPLETED' | 'PENDING' | 'VOID';
 
@@ -22,7 +23,7 @@ export default function TransactionsPage() {
   const [endDate, setEndDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  
+
   // State for Receipt Modal
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [selectedTransactionForReceipt, setSelectedTransactionForReceipt] = useState<Transaction | null>(null);
@@ -35,12 +36,12 @@ export default function TransactionsPage() {
     try {
       setIsLoading(true);
       const params: any = {};
-      
+
       if (selectedPayment) params.paymentMethod = selectedPayment;
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
       if (statusFilter !== 'ALL') params.status = statusFilter;
-      
+
       const response = await transactionsAPI.getAll(params);
       setTransactions(response.data.data || []);
     } catch (error) {
@@ -166,7 +167,7 @@ export default function TransactionsPage() {
                 <option value="DEBT">Kasbon</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2">Status</label>
               <select
@@ -232,7 +233,7 @@ export default function TransactionsPage() {
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold">Semua Transaksi</h2>
-            <button 
+            <button
               className="btn btn-secondary btn-sm"
               onClick={handleExportExcel}
               disabled={filteredTransactions.length === 0}
@@ -299,13 +300,17 @@ export default function TransactionsPage() {
                       </td>
                       <td>
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             className="p-2 rounded-lg hover:bg-[var(--surface)] transition-colors"
+                            onClick={() => {
+                              setSelectedTransactionForReceipt(transaction);
+                              setShowReceiptModal(true);
+                            }}
                             title="Lihat Detail"
                           >
                             <Eye size={16} />
                           </button>
-                          <button 
+                          <button
                             className="p-2 rounded-lg hover:bg-[var(--surface)] transition-colors text-[var(--primary)]"
                             onClick={() => handlePrintReceipt(transaction)}
                             title="Print Receipt"
@@ -323,6 +328,14 @@ export default function TransactionsPage() {
         </div>
       </div>
 
+      <ReceiptModal
+        isOpen={showReceiptModal}
+        onClose={() => {
+          setShowReceiptModal(false);
+          setSelectedTransactionForReceipt(null);
+        }}
+        transaction={selectedTransactionForReceipt}
+      />
     </DashboardLayout>
   );
 }

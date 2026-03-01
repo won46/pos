@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/database';
 
@@ -9,20 +9,25 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     // Find user with role
+    console.log(`[LOGIN] Attempting login for email: ${email}`);
     const user = await prisma.user.findUnique({
       where: { email },
       include: { role: true },
     });
 
     if (!user) {
+      console.log(`[LOGIN] User NOT found for email: ${email}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',
       });
     }
 
+    console.log(`[LOGIN] User found: ${user.email}, Role: ${user.role.name}, Active: ${user.isActive}`);
+
     // Check if user is active
     if (!user.isActive) {
+      console.log(`[LOGIN] User is DEACTIVATED: ${email}`);
       return res.status(403).json({
         success: false,
         message: 'Account is deactivated',
@@ -30,7 +35,9 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Verify password
+    console.log(`[LOGIN] Verifying password for: ${email}`);
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    console.log(`[LOGIN] Password match: ${isPasswordValid}`);
 
     if (!isPasswordValid) {
       return res.status(401).json({

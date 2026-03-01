@@ -34,11 +34,11 @@ export function CartPanel({ onCheckout }: CartPanelProps) {
 
   const [showDiscountInput, setShowDiscountInput] = useState(false);
   const [isCustomerSelectorOpen, setIsCustomerSelectorOpen] = useState(false);
-  
+
   // Refs for quantity inputs
   const quantityInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const [lastAddedItemId, setLastAddedItemId] = useState<string | null>(null);
-  
+
   // Auto-focus on last added item's quantity input
   useEffect(() => {
     if (lastAddedItemId && quantityInputRefs.current[lastAddedItemId]) {
@@ -47,7 +47,7 @@ export function CartPanel({ onCheckout }: CartPanelProps) {
       setLastAddedItemId(null);
     }
   }, [lastAddedItemId, items]);
-  
+
   // Track when new item is added
   const prevItemCountRef = useRef(items.length);
   useEffect(() => {
@@ -93,29 +93,29 @@ export function CartPanel({ onCheckout }: CartPanelProps) {
 
         {/* Customer Selector */}
         <div className="relative">
-             <div 
-              onClick={() => setIsCustomerSelectorOpen(true)}
-              className="flex items-center w-full min-h-[38px] px-3 py-2 text-sm border rounded-lg cursor-pointer hover:border-[var(--primary)] transition-colors bg-white relative"
-             >
-               <User size={16} className="text-[var(--foreground-muted)] mr-2" />
-               <span className={customerName ? 'text-gray-900' : 'text-gray-400'}>
-                 {customerName || 'Pilih Pelanggan...'}
-               </span>
-               {customerName && (
-                 <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCustomer(null, '');
-                  }}
-                  className="absolute right-2 p-1 hover:bg-gray-100 rounded-full"
-                 >
-                   <X size={14} className="text-gray-500" />
-                 </button>
-               )}
-             </div>
+          <div
+            onClick={() => setIsCustomerSelectorOpen(true)}
+            className="flex items-center w-full min-h-[38px] px-3 py-2 text-sm border rounded-lg cursor-pointer hover:border-[var(--primary)] transition-colors bg-white relative"
+          >
+            <User size={16} className="text-[var(--foreground-muted)] mr-2" />
+            <span className={customerName ? 'text-gray-900' : 'text-gray-400'}>
+              {customerName || 'Pilih Pelanggan...'}
+            </span>
+            {customerName && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCustomer(null, '');
+                }}
+                className="absolute right-2 p-1 hover:bg-gray-100 rounded-full"
+              >
+                <X size={14} className="text-gray-500" />
+              </button>
+            )}
+          </div>
         </div>
-        
-        <CustomerSelector 
+
+        <CustomerSelector
           isOpen={isCustomerSelectorOpen}
           onClose={() => setIsCustomerSelectorOpen(false)}
           onSelect={(customer) => setCustomer(customer.id, customer.name)}
@@ -140,125 +140,132 @@ export function CartPanel({ onCheckout }: CartPanelProps) {
             items.map((item) => {
               const unitType = (item as any).unitType || 'pcs';
               return (
-              <motion.div
-                key={`${item.productId}-${unitType}`}
-                layout
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="cart-item flex-col !items-stretch"
-              >
-                {/* Row 1: Image + Name + Delete */}
-                <div className="flex items-start gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-[var(--background-tertiary)] flex items-center justify-center flex-shrink-0">
-                    {item.product.imageUrl ? (
-                      <img
-                        src={item.product.imageUrl}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <span className="text-sm">📦</span>
+                <motion.div
+                  key={`${item.productId}-${unitType}`}
+                  layout
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="cart-item flex-col !items-stretch"
+                >
+                  {/* Row 1: Image + Name + Delete */}
+                  <div className="flex items-start gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-[var(--background-tertiary)] flex items-center justify-center flex-shrink-0">
+                      {item.product.imageUrl ? (
+                        <img
+                          src={item.product.imageUrl}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <span className="text-sm">📦</span>
+                      )}
+                    </div>
+                    <p
+                      className="flex-1 text-sm font-medium leading-tight"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {item.product.name}
+                    </p>
+                    {(item.product.size || item.product.color) && (
+                      <div className="flex gap-1.5 mt-0.5">
+                        {item.product.size && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--foreground-muted)] border border-[var(--border)]">
+                            {item.product.size}
+                          </span>
+                        )}
+                        {item.product.color && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--foreground-muted)] border border-[var(--border)] flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.product.color }}></span>
+                            {item.product.color}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <button
+                      onClick={() => removeItem(item.productId, unitType)}
+                      className="text-[var(--danger)] hover:bg-[var(--danger-bg)] p-1 rounded transition-colors flex-shrink-0"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                  {/* Row 2: Price x Qty = Total */}
+                  <div className="flex items-center justify-between pl-12 mt-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[var(--foreground-muted)]">{formatPrice(item.unitPrice)}</span>
+                      <span className="text-xs text-[var(--foreground-muted)]">×</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          tabIndex={-1}
+                          onClick={() => updateQuantity(item.productId, item.quantity - 1, unitType)}
+                          className="w-5 h-5 rounded bg-[var(--surface)] hover:bg-[var(--surface-hover)] flex items-center justify-center border border-[var(--border)]"
+                        >
+                          <Minus size={10} />
+                        </button>
+                        <input
+                          type="number"
+                          ref={(el) => { quantityInputRefs.current[item.productId] = el; }}
+                          value={item.quantity}
+                          onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value) || 1, unitType)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              // Return focus to search box
+                              window.dispatchEvent(new CustomEvent('pos-return-focus'));
+                            }
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          className="w-10 text-center text-xs font-semibold input py-0.5"
+                          min="1"
+                        />
+                        <button
+                          tabIndex={-1}
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1, unitType)}
+                          className="w-5 h-5 rounded bg-[var(--surface)] hover:bg-[var(--surface-hover)] flex items-center justify-center border border-[var(--border)]"
+                        >
+                          <Plus size={10} />
+                        </button>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-[var(--foreground)]">
+                      {formatPrice(item.totalPrice)}
+                    </span>
+                  </div>
+
+                  {/* Row 3: Discount Input (Below) */}
+                  <div className="pl-12 mt-1 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-wider">Diskon:</span>
+                      <div className="flex items-center gap-0.5 border border-[var(--border)] rounded px-2 bg-white focus-within:border-[var(--primary)] transition-colors">
+                        <input
+                          type="number"
+                          value={(item as any).discountPercent || 0}
+                          onChange={(e) => {
+                            const val = Math.min(100, Math.max(0, parseInt(e.target.value) || 0));
+                            setItemDiscountPercent(item.productId, unitType, val);
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          className="w-10 text-center text-xs font-bold bg-transparent focus:outline-none py-1"
+                          min="0"
+                          max="100"
+                        />
+                        <span className="text-[10px] font-bold text-[var(--foreground-muted)]">%</span>
+                      </div>
+                    </div>
+
+                    {(item as any).discount > 0 && (
+                      <span className="text-[10px] text-[var(--success)] font-bold bg-[var(--success-bg)] px-2 py-0.5 rounded">
+                        Potongan -{formatPrice((item as any).discount)}
+                      </span>
                     )}
                   </div>
-                  <p 
-                    className="flex-1 text-sm font-medium leading-tight"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {item.product.name}
-                  </p>
-                  {(item.product.size || item.product.color) && (
-                    <div className="flex gap-1.5 mt-0.5">
-                      {item.product.size && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--foreground-muted)] border border-[var(--border)]">
-                          {item.product.size}
-                        </span>
-                      )}
-                      {item.product.color && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--foreground-muted)] border border-[var(--border)] flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.product.color }}></span>
-                          {item.product.color}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <button
-                    onClick={() => removeItem(item.productId, unitType)}
-                    className="text-[var(--danger)] hover:bg-[var(--danger-bg)] p-1 rounded transition-colors flex-shrink-0"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-                
-                {/* Row 2: Price x Qty = Total */}
-                <div className="flex items-center justify-between pl-12 mt-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-[var(--foreground-muted)]">{formatPrice(item.unitPrice)}</span>
-                    <span className="text-xs text-[var(--foreground-muted)]">×</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        tabIndex={-1}
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1, unitType)}
-                        className="w-5 h-5 rounded bg-[var(--surface)] hover:bg-[var(--surface-hover)] flex items-center justify-center border border-[var(--border)]"
-                      >
-                        <Minus size={10} />
-                      </button>
-                      <input
-                        type="number"
-                        ref={(el) => { quantityInputRefs.current[item.productId] = el; }}
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value) || 1, unitType)}
-                        className="w-10 text-center text-xs font-semibold input py-0.5"
-                        min="1"
-                      />
-                      <button
-                        tabIndex={-1}
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1, unitType)}
-                        className="w-5 h-5 rounded bg-[var(--surface)] hover:bg-[var(--surface-hover)] flex items-center justify-center border border-[var(--border)]"
-                      >
-                        <Plus size={10} />
-                      </button>
-                    </div>
-                  </div>
-                  <span className="text-sm font-bold text-[var(--foreground)]">
-                    {formatPrice(item.totalPrice)}
-                  </span>
-                </div>
-
-                {/* Row 3: Discount Input (Below) */}
-                <div className="pl-12 mt-1 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-wider">Diskon:</span>
-                    <div className="flex items-center gap-0.5 border border-[var(--border)] rounded px-2 bg-white focus-within:border-[var(--primary)] transition-colors">
-                      <input
-                        type="number"
-                        value={(item as any).discountPercent || 0}
-                        onChange={(e) => {
-                          const val = Math.min(100, Math.max(0, parseInt(e.target.value) || 0));
-                          setItemDiscountPercent(item.productId, unitType, val);
-                        }}
-                        onFocus={(e) => e.target.select()}
-                        className="w-10 text-center text-xs font-bold bg-transparent focus:outline-none py-1"
-                        min="0"
-                        max="100"
-                      />
-                      <span className="text-[10px] font-bold text-[var(--foreground-muted)]">%</span>
-                    </div>
-                  </div>
-                  
-                  {(item as any).discount > 0 && (
-                    <span className="text-[10px] text-[var(--success)] font-bold bg-[var(--success-bg)] px-2 py-0.5 rounded">
-                      Potongan -{formatPrice((item as any).discount)}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
+                </motion.div>
               );
             })
           )}

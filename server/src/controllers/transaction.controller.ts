@@ -34,11 +34,11 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
     console.log(`[CreateTransaction] Processing for User ID: ${userId}`);
     console.log(`[CreateTransaction] Payload:`, { paymentMethod, totalAmount, payments });
     const invoiceNumber = generateInvoiceNumber();
-    
+
     // Default values
     let paymentStatus: 'PAID' | 'UNPAID' | 'PARTIAL' = 'PAID';
     let remainingAmount = 0;
-    
+
     // Calculate total paid and remaining based on method
     let totalPaid = 0;
 
@@ -58,14 +58,14 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
 
     // Logic for remaining amount
     if (paymentMethod === 'DEBT') {
-        // Full debt or partial debt (logic handled by frontend usually sending paidAmount < total)
-        remainingAmount = Number(totalAmount) - totalPaid;
+      // Full debt or partial debt (logic handled by frontend usually sending paidAmount < total)
+      remainingAmount = Number(totalAmount) - totalPaid;
     } else if (paymentMethod === 'SPLIT') {
-        remainingAmount = Number(totalAmount) - totalPaid;
+      remainingAmount = Number(totalAmount) - totalPaid;
     } else {
-        // Standard payment (CASH, QRIS, CARD) - usually full payment
-        // But if paidAmount < total (and not DEBT), technically it's partial, but standard POS usually treats standard methods as full or 'change returned'
-        remainingAmount = Math.max(0, Number(totalAmount) - totalPaid);
+      // Standard payment (CASH, QRIS, CARD) - usually full payment
+      // But if paidAmount < total (and not DEBT), technically it's partial, but standard POS usually treats standard methods as full or 'change returned'
+      remainingAmount = Math.max(0, Number(totalAmount) - totalPaid);
     }
 
     // Determine status
@@ -77,17 +77,17 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
     } else {
       paymentStatus = 'UNPAID';
     }
-    
+
     // For DEBT validation
     if (remainingAmount > 0 && !customerId) {
-       return res.status(400).json({
-          success: false,
-          message: 'Customer is required for transactions with remaining debt',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Customer is required for transactions with remaining debt',
+      });
     }
 
-    const changeAmount = (remainingAmount === 0 && totalPaid > Number(totalAmount)) 
-      ? totalPaid - Number(totalAmount) 
+    const changeAmount = (remainingAmount === 0 && totalPaid > Number(totalAmount))
+      ? totalPaid - Number(totalAmount)
       : 0;
 
     // Start transaction
@@ -123,6 +123,8 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
+            discountAmount: item.discountAmount || 0,
+            discountPercent: item.discountPercent || 0,
           },
         });
 
@@ -139,33 +141,33 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
 
       // 3. Record Payments
       if (paymentMethod === 'SPLIT') {
-          for (const p of payments) {
-             await tx.transactionPayment.create({
-                data: {
-                    transactionId: newTransaction.id,
-                    amount: Number(p.amount),
-                    paymentMethod: p.method,
-                    notes: p.notes || 'Split Bill',
-                    paymentDate: new Date()
-                }
-             });
-          }
+        for (const p of payments) {
+          await tx.transactionPayment.create({
+            data: {
+              transactionId: newTransaction.id,
+              amount: Number(p.amount),
+              paymentMethod: p.method,
+              notes: p.notes || 'Split Bill',
+              paymentDate: new Date()
+            }
+          });
+        }
       } else if (totalPaid > 0) {
-          // Record single payment (CASH, QRIS, etc)
-          // For DEBT, we only record what was PAID.
-           await tx.transactionPayment.create({
-              data: {
-                  transactionId: newTransaction.id,
-                  amount: Number(totalPaid), // Only record the paid portion
-                  paymentMethod: paymentMethod === 'DEBT' ? 'CASH' : paymentMethod, // If DEBT but has paidAmount, assume DP is CASH unless specified? Actually standard DEBT usually implies 0 DP or DP via Cash. Let's assume 'CASH' or rely on frontend? 
-                  // Simplification: If DEBT, the initial payment is considered CASH/Down Payment. 
-                  // If standard payment, it matches the method.
-                  notes: 'Initial Payment',
-                  paymentDate: new Date()
-              }
-           });
+        // Record single payment (CASH, QRIS, etc)
+        // For DEBT, we only record what was PAID.
+        await tx.transactionPayment.create({
+          data: {
+            transactionId: newTransaction.id,
+            amount: Number(totalPaid), // Only record the paid portion
+            paymentMethod: paymentMethod === 'DEBT' ? 'CASH' : paymentMethod, // If DEBT but has paidAmount, assume DP is CASH unless specified? Actually standard DEBT usually implies 0 DP or DP via Cash. Let's assume 'CASH' or rely on frontend? 
+            // Simplification: If DEBT, the initial payment is considered CASH/Down Payment. 
+            // If standard payment, it matches the method.
+            notes: 'Initial Payment',
+            paymentDate: new Date()
+          }
+        });
       }
-      
+
       // 4. Update Customer Current Debt
       if (remainingAmount > 0 && customerId) {
         await tx.customer.update({
@@ -204,10 +206,13 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
       message: 'Transaction created successfully',
     });
   } catch (error: any) {
-    console.error('Transaction creation error:', error);
+    console.error('[CreateTransaction] FATAL ERROR:', error);
+    if (error.code) console.error('[CreateTransaction] Error Code:', error.code);
+    if (error.meta) console.error('[CreateTransaction] Error Meta:', error.meta);
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create transaction',
+      message: 'Gagal menyimpan transaksi: ' + (error.message || 'Internal Server Error'),
     });
   }
 };
@@ -266,7 +271,7 @@ export const repayDebt = async (req: AuthRequest, res: Response) => {
           paymentStatus: newStatus,
           // Update paidAmount logic: previous paid + new repay
           paidAmount: {
-             increment: repayAmount
+            increment: repayAmount
           }
         }
       });
@@ -282,7 +287,7 @@ export const repayDebt = async (req: AuthRequest, res: Response) => {
           }
         });
       }
-      
+
       return updatedTransaction;
     });
 

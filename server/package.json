@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "POS Application Backend API",
   "main": "dist/index.js",
+  "license": "ISC",
+  "pkg": {
+    "assets": [
+      "node_modules/.prisma/client/*.js",
+      "node_modules/.prisma/client/*.node"
+    ]
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -12,23 +19,13 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
     "build:bundle": "ncc build src/index.ts -o dist-bundle -m",
-    "build:binary:macos": "pkg dist-bundle/index.js --targets node18-macos-arm64 --output dist-bin/pos-server-macos",
     "build:binary:win": "pkg dist-bundle/index.js --targets node18-win-x64 --output dist-bin/pos-server-win.exe"
   },
-  "keywords": [
-    "pos",
-    "api",
-    "express",
-    "prisma",
-    "postgresql"
-  ],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.8.0",
     "@types/escpos": "^2.5.5",
     "@types/multer": "^2.0.0",
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "escpos": "^3.0.0-alpha.6",
@@ -44,6 +41,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.5",

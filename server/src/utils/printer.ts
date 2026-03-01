@@ -71,15 +71,21 @@ export const printReceipt = async (data: any) => {
 
                 // Print items if provided
                 if (data.items && Array.isArray(data.items)) {
+                    printer.text('ITEM');
+                    printer.text('QTY    HARGA     DISC%     TOTAL');
+                    printer.text('--------------------------------');
+
                     data.items.forEach((item: any) => {
+                        // Line 1: Item Name
                         printer.text(`${item.name}`);
-                        const qtyPrice = `${item.qty} x ${item.price}`;
-                        const total = `${item.total}`;
-                        printer.text(qtyPrice.padEnd(20) + total.padStart(12));
-                        
-                        if (item.discount && item.discount > 0) {
-                            printer.text(`   (Potongan: -${item.discount})`);
-                        }
+
+                        // Line 2: Qty, Price, Disc%, Total
+                        const qty = `${item.qty}`.padEnd(5);
+                        const price = `${item.price}`.padEnd(10);
+                        const disc = `${item.discountPercent || 0}%`.padEnd(8);
+                        const total = `${item.total}`.padStart(9);
+
+                        printer.text(qty + price + disc + total);
                     });
                 }
 
@@ -90,7 +96,7 @@ export const printReceipt = async (data: any) => {
                 if (data.subtotal) {
                     printer.text(`Subtotal: ${data.subtotal}`);
                 }
-                
+
                 if (data.discountAmount && data.discountAmount > 0) {
                     printer.text(`Total Diskon: -${data.discountAmount}`);
                 }

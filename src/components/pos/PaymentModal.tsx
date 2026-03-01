@@ -197,7 +197,7 @@ export function PaymentModal({ isOpen, onClose, onComplete }: PaymentModalProps)
       } catch (error: any) {
         console.error('Failed to create transaction:', error);
         let message = error.response?.data?.message || 'Gagal membuat transaksi. Silakan coba lagi.';
-        
+
         // Handle specific Midtrans errors
         if (error.response?.status === 402 || message.includes('Payment channel is not activated')) {
           message = 'Saluran pembayaran belum aktif di akun Midtrans Production. Harap selesaikan verifikasi bisnis Anda di Dashboard Midtrans atau gunakan Mode Sandbox.';
@@ -297,13 +297,14 @@ export function PaymentModal({ isOpen, onClose, onComplete }: PaymentModalProps)
         unitPrice: item.unitPrice,
         totalPrice: item.totalPrice,
         discount: item.discount,
+        discountAmount: item.discount,
         discountPercent: item.discountPercent
       }))
     };
-    
+
     // Attempt physical print
     await printReceipt(transaction);
-    
+
     // Close cart/modal after print
     if (isComplete) {
       clearCart();
@@ -437,8 +438,8 @@ export function PaymentModal({ isOpen, onClose, onComplete }: PaymentModalProps)
                   onClick={() => handleMethodSelect(method.id)}
                   disabled={isProcessing && selectedMethod !== method.id && selectedMethod !== 'SPLIT'}
                   className={`p-2 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 h-20 ${selectedMethod === method.id
-                      ? 'border-[var(--primary)] bg-[rgba(99,102,241,0.1)]'
-                      : 'border-[var(--border)] hover:border-[var(--border-hover)]'
+                    ? 'border-[var(--primary)] bg-[rgba(99,102,241,0.1)]'
+                    : 'border-[var(--border)] hover:border-[var(--border-hover)]'
                     }`}
                 >
                   <method.icon
@@ -559,8 +560,8 @@ export function PaymentModal({ isOpen, onClose, onComplete }: PaymentModalProps)
                         key={amount}
                         onClick={() => handleQuickAmount(amount)}
                         className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${paidAmount === amount
-                            ? 'bg-[var(--primary)] text-white'
-                            : 'bg-[var(--surface)] hover:bg-[var(--surface-hover)]'
+                          ? 'bg-[var(--primary)] text-white'
+                          : 'bg-[var(--surface)] hover:bg-[var(--surface-hover)]'
                           }`}
                       >
                         {formatPrice(amount)}

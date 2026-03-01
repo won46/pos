@@ -50,7 +50,7 @@ async function main() {
     { role: 'ADMIN', menuPath: '/reports/inventory', menuLabel: 'Laporan Inventory', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
     { role: 'ADMIN', menuPath: '/users', menuLabel: 'Pengguna', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
     { role: 'ADMIN', menuPath: '/settings', menuLabel: 'Pengaturan', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
-    
+
     // MANAGER: All except user management
     { role: 'MANAGER', menuPath: '/dashboard', menuLabel: 'Dashboard', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
     { role: 'MANAGER', menuPath: '/pos', menuLabel: 'Kasir (POS)', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
@@ -67,7 +67,7 @@ async function main() {
     { role: 'MANAGER', menuPath: '/reports', menuLabel: 'Laporan Penjualan', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
     { role: 'MANAGER', menuPath: '/reports/inventory', menuLabel: 'Laporan Inventory', canRead: true, canCreate: true, canUpdate: true, canDelete: true },
     { role: 'MANAGER', menuPath: '/settings', menuLabel: 'Pengaturan', canRead: true, canCreate: false, canUpdate: false, canDelete: false },
-    
+
     // CASHIER: Limited
     { role: 'CASHIER', menuPath: '/dashboard', menuLabel: 'Dashboard', canRead: true, canCreate: false, canUpdate: false, canDelete: false },
     { role: 'CASHIER', menuPath: '/pos', menuLabel: 'Kasir (POS)', canRead: true, canCreate: true, canUpdate: false, canDelete: false },
@@ -77,7 +77,7 @@ async function main() {
   for (const perm of permissions) {
     const roleId = roleMap[perm.role];
     if (!roleId) continue;
-    
+
     // Remove role string from object for creating Permission
     const { role, ...permData } = perm;
 
@@ -103,20 +103,20 @@ async function main() {
 
   // Seed Default Admin User
   console.log('👤 Seeding default admin user...');
-  
+
   // Hash password
   // Note: In a real app we would import bcrypt, but for simplicity in seeding 
   // we can mock it or use a known hash if bcrypt isn't available in top scope.
   // However, since we are in a ts file processed by tsx, we can try dynamic import or assume bcrypt is available.
   // Let's rely on the fact bcrypt is in package.json
-  const bcrypt = require('bcrypt');
+  const bcrypt = require('bcryptjs');
   const passwordHash = await bcrypt.hash('admin123', 10);
 
   const adminRole = await prisma.role.findUnique({ where: { name: 'ADMIN' } });
 
   if (adminRole) {
     const adminUser = await prisma.user.upsert({
-      where: { email: 'admin@swiftpos.com' },
+      where: { email: 'admin@pos.com' },
       update: {
         fullName: 'System Administrator',
         roleId: adminRole.id,
@@ -124,7 +124,7 @@ async function main() {
         isActive: true,
       },
       create: {
-        email: 'admin@swiftpos.com',
+        email: 'admin@pos.com',
         fullName: 'System Administrator',
         passwordHash: passwordHash,
         roleId: adminRole.id,
@@ -132,6 +132,19 @@ async function main() {
       },
     });
     console.log(`✅ Default admin created: ${adminUser.email} (Password: admin123)`);
+
+    // Also create admin@swiftpos.com for backward compatibility
+    await prisma.user.upsert({
+      where: { email: 'admin@swiftpos.com' },
+      update: { passwordHash, isActive: true },
+      create: {
+        email: 'admin@swiftpos.com',
+        fullName: 'SwiftPOS Admin',
+        passwordHash,
+        roleId: adminRole.id,
+        isActive: true,
+      }
+    });
   } else {
     console.error('❌ Could not find ADMIN role to create user');
   }
