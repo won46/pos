@@ -42,7 +42,7 @@ export default function ProductsPage() {
     pricePerUnit: {} as Record<string, string>,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');  
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -100,12 +100,12 @@ export default function ProductsPage() {
       try {
         const rawSaleUnits = (product as any).saleUnits;
         if (typeof rawSaleUnits === 'string') {
-            saleUnits = rawSaleUnits.includes('[') ? JSON.parse(rawSaleUnits) : rawSaleUnits.split(',');
+          saleUnits = rawSaleUnits.includes('[') ? JSON.parse(rawSaleUnits) : rawSaleUnits.split(',');
         } else if (Array.isArray(rawSaleUnits)) {
-            saleUnits = rawSaleUnits;
+          saleUnits = rawSaleUnits;
         }
-      } catch(e) {
-          console.error("Error parsing saleUnits", e);
+      } catch (e) {
+        console.error("Error parsing saleUnits", e);
       }
       setFormData({
         name: product.name,
@@ -183,9 +183,9 @@ export default function ProductsPage() {
   const handleSaveProduct = async () => {
     try {
       setIsUploading(true);
-      
+
       let imageUrl = formData.imageUrl;
-      
+
       // Upload image if new file selected
       if (imageFile) {
         const uploadResponse = await uploadAPI.uploadProductImage(imageFile);
@@ -259,7 +259,8 @@ export default function ProductsPage() {
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.sku?.toLowerCase().includes(searchQuery.toLowerCase())
+    product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.barcode?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -381,11 +382,10 @@ export default function ProductsPage() {
                       </td>
                       <td>
                         <span
-                          className={`badge ${
-                            product.stockQuantity <= product.lowStockThreshold
+                          className={`badge ${product.stockQuantity <= product.lowStockThreshold
                               ? 'badge-warning'
                               : 'badge-success'
-                          }`}
+                            }`}
                         >
                           {product.stockQuantity}
                         </span>
@@ -449,7 +449,7 @@ export default function ProductsPage() {
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2">Ukuran</label>
             <Input
@@ -547,7 +547,7 @@ export default function ProductsPage() {
           {/* Unit Conversion Section */}
           <div className="border-t border-[var(--border)] pt-4 mt-4">
             <h3 className="text-sm font-semibold mb-4 text-[var(--primary)]">⚙️ Konversi Satuan</h3>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Satuan Beli</label>
@@ -555,8 +555,8 @@ export default function ProductsPage() {
                   value={formData.purchaseUnit}
                   onChange={(e) => {
                     const selectedUnit = units.find(u => u.name === e.target.value);
-                    setFormData({ 
-                      ...formData, 
+                    setFormData({
+                      ...formData,
                       purchaseUnit: e.target.value,
                       purchaseUnitQty: selectedUnit?.qty?.toString() || '1'
                     });
@@ -710,16 +710,16 @@ export default function ProductsPage() {
       >
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-             <X size={32} className="text-red-600" />
+            <X size={32} className="text-red-600" />
           </div>
           <h2 className="text-xl font-bold mb-2">Terjadi Kesalahan</h2>
           <p className="text-gray-600 mb-6">{errorMessage}</p>
           <Button
-             variant="primary"
-             className="w-full bg-red-600 hover:bg-red-700"
-             onClick={() => setIsErrorModalOpen(false)}
+            variant="primary"
+            className="w-full bg-red-600 hover:bg-red-700"
+            onClick={() => setIsErrorModalOpen(false)}
           >
-             Tutup
+            Tutup
           </Button>
         </div>
       </Modal>

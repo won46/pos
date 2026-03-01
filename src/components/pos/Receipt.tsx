@@ -112,10 +112,7 @@ export function Receipt({ transaction }: ReceiptProps) {
           <span>Subtotal:</span>
           <span>{formatCurrency(transaction.subtotal)}</span>
         </div>
-        <div className="total-row">
-          <span>PPN (11%):</span>
-          <span>{formatCurrency(transaction.taxAmount)}</span>
-        </div>
+
         {transaction.discountAmount > 0 && (
           <div className="total-row">
             <span>Diskon:</span>
