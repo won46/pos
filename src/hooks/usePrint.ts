@@ -104,7 +104,17 @@ export function usePrint() {
             storeAddress: settings?.storeAddress,
             storePhone: settings?.storePhone,
             amountPaid: transaction.paidAmount,
-            change: transaction.changeAmount
+            change: transaction.changeAmount,
+            invoiceNumber: transaction.invoiceNumber,
+            transactionDate: new Date(transaction.transactionDate).toLocaleString('id-ID', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            cashierName: transaction.user?.fullName || 'Kasir',
+            customerName: transaction.customerName || null
           };
           await printerAPI.printReceipt(printData);
           alert('Mencetak ke printer sistem (Backend)');
@@ -146,7 +156,7 @@ export function usePrint() {
             hour: '2-digit',
             minute: '2-digit',
           }),
-          cashierName: transaction.user?.fullName || 'N/A',
+          cashierName: transaction.user?.fullName || 'Kasir',
           customerName: transaction.customerName || null
         };
         await printerAPI.printReceipt(printData);

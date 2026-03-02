@@ -54,29 +54,42 @@ export const printReceipt = async (data: any) => {
                     return reject(error);
                 }
 
+                // 1. Header
                 printer
                     .font('B')
                     .align('CT')
-                    .size(1, 1)
+                    .size(2, 2)
                     .text(data.storeName || 'SWIFTPOS')
+                    .size(1, 1)
                     .text(data.storeAddress || '');
 
                 if (data.storePhone) {
-                    printer.text(data.storePhone);
+                    printer.text(`Telp: ${data.storePhone}`);
                 }
 
-                printer
-                    .text('================')
-                    .align('LT');
+                printer.text('================================');
 
-                // Print items if provided
+                // 2. Transaction Info
+                printer
+                    .align('LT')
+                    .text(`Invoice : ${data.invoiceNumber || '-'}`)
+                    .text(`Tanggal : ${data.transactionDate || '-'}`)
+                    .text(`Kasir   : ${data.cashierName || '-'}`);
+
+                if (data.customerName) {
+                    printer.text(`Customer: ${data.customerName}`);
+                }
+
+                printer.text('================================');
+
+                // 3. Items
                 if (data.items && Array.isArray(data.items)) {
                     printer.text('ITEM');
                     printer.text('QTY    HARGA     DISC%     TOTAL');
                     printer.text('--------------------------------');
 
                     data.items.forEach((item: any) => {
-                        // Line 1: Item Name
+                        // Line 1: Item Name (Truncate if too long for 32 chars)
                         printer.text(`${item.name}`);
 
                         // Line 2: Qty, Price, Disc%, Total
@@ -90,7 +103,7 @@ export const printReceipt = async (data: any) => {
                 }
 
                 printer
-                    .text('----------------')
+                    .text('--------------------------------')
                     .align('RT');
 
                 if (data.subtotal) {
@@ -101,7 +114,10 @@ export const printReceipt = async (data: any) => {
                     printer.text(`Total Diskon: -${data.discountAmount}`);
                 }
 
-                printer.text(`Total: ${data.totalAmount || 0}`);
+                printer
+                    .size(2, 2)
+                    .text(`TOTAL: ${data.totalAmount || 0}`)
+                    .size(1, 1);
 
                 if (data.amountPaid !== undefined) {
                     printer
@@ -111,8 +127,11 @@ export const printReceipt = async (data: any) => {
 
                 printer
                     .align('CT')
-                    .text('================')
-                    .text('Thank you!')
+                    .text('================================')
+                    .text('Terima kasih atas kunjungan Anda!')
+                    .text('Barang yang sudah dibeli')
+                    .text('tidak dapat ditukar/dikembalikan')
+                    .text('--- STRUK INI SAH ---')
                     .text(' ')
                     .text(' ')
                     .cut();
